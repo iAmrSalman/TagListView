@@ -218,7 +218,6 @@ open class TagListView: UIView {
     private(set) var tagBackgroundViews: [UIView] = []
     private(set) var rowViews: [UIView] = []
     private(set) var tagViewHeight: CGFloat = 0
-    private(set) var totalRowViewHeight: CGFloat = 0
     private(set) var rows = 0 {
         didSet {
             invalidateIntrinsicContentSize()
@@ -253,8 +252,6 @@ open class TagListView: UIView {
         var currentRowView: UIView!
         var currentRowTagCount = 0
         var currentRowWidth: CGFloat = 0
-        totalRowViewHeight = 0
-
         for (index, tagView) in tagViews.enumerated() {
             tagView.frame.size = tagView.intrinsicContentSize
             tagViewHeight = tagView.frame.height
@@ -267,13 +264,8 @@ open class TagListView: UIView {
                 currentRowWidth = 0
                 currentRowTagCount = 0
                 currentRowView = UIView()
-                if let lastView = rowViews.last {
-                     let yPosition = lastView.frame.origin.y + lastView.frame.height + marginY
-                     currentRowView.frame.origin.y = yPosition
-                 } else {
-                     currentRowView.frame.origin.y = 0.0
-                 }
-
+                currentRowView.frame.origin.y = CGFloat(currentRow - 1) * (tagViewHeight + marginY)
+                
                 rowViews.append(currentRowView)
                 addSubview(currentRowView)
 
@@ -305,21 +297,15 @@ open class TagListView: UIView {
             currentRowView.frame.size.width = currentRowWidth
             currentRowView.frame.size.height = max(tagViewHeight, currentRowView.frame.height)
         }
-
-        for rowView in rowViews {
-             let frame = rowView.frame
-             totalRowViewHeight += frame.height + marginY
-         }
-
-         rows = currentRow
-
+        rows = currentRow
+        
         invalidateIntrinsicContentSize()
     }
     
     // MARK: - Manage tags
     
     override open var intrinsicContentSize: CGSize {
-        var height = totalRowViewHeight
+        var height = CGFloat(rows) * (tagViewHeight + marginY)
         if rows > 0 {
             height -= marginY
         }
